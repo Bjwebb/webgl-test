@@ -248,8 +248,12 @@ function handleKeyDown(event) {
         y -= canvas.offsetTop;
         data_x = Math.floor(x/4);
         data_y = 128 - Math.floor(y/4);
-        data[128*4*data_y+4*data_x+3] = 255;
-        data[128*4*data_y+4*data_x+2] = 255;
+        //data[128*4*data_y+4*data_x+3] = 255;
+        if (data[128*4*data_y+4*data_x+2] == 255) {
+            data[128*4*data_y+4*data_x+2] = 0;
+        } else {
+            data[128*4*data_y+4*data_x+2] = 255;
+        }
         redrawData();
       }
 
