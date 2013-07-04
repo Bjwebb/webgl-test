@@ -53,6 +53,10 @@ function onLoad(){
                 scene.add(car2);
             } );
 
+      // plane
+      var plane = new THREE.Mesh(new THREE.PlaneGeometry(10, 10), new THREE.MeshNormalMaterial());
+      scene.add(plane);
+
             //Call the animate function
             animate();
     }
@@ -90,7 +94,7 @@ function handleKeyUp(event) {
 
 function handleKeys(elapsed) {
     var speed = 4;
-    var rspeed = 1;
+    var rspeed = 2;
     if (currentlyPressedKeys[37]) {
         car.rotation.z += elapsed*rspeed/1000;
     }
