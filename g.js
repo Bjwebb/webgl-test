@@ -1,10 +1,39 @@
 Physijs.scripts.worker = 'physijs_worker.js';
 Physijs.scripts.ammo = 'ammo.js';
 
+
+
+
+function mouseClick(e) {
+    document.getElementById('container').webkitRequestPointerLock(); // FIXME
+}
+
+function mouseMove(e) { 
+    // .movementX/Y are valid normally as the mouse hovers
+    // over an element. But when the mouse is locked the
+    // mousemove event continues to fire whenever the mouse
+    // moves.
+  var movementX = e.movementX ||
+      e.mozMovementX          ||
+      e.webkitMovementX       ||
+      0,
+  movementY = e.movementY ||
+      e.mozMovementY      ||
+      e.webkitMovementY   ||
+      0;
+    console.log(movementX + ", " + movementY); 
+    camera_pivot.rotation.y += movementX/100;
+    camera_pivot.rotation.x -= movementY/100;
+}
+
+
+
 var car, scene, camera;
 function onLoad(){
     document.onkeydown = handleKeyDown;
     document.onkeyup = handleKeyUp;
+document.getElementById('container').addEventListener("click", mouseClick);
+document.getElementById('container').addEventListener("mousemove", mouseMove);
     initScene();
     function initScene() {
 
@@ -39,6 +68,7 @@ function onLoad(){
             //Load a model and store it in the variable XXX
             jsonLoader.load( "blender/car.json", function( geometry, materials ) { 
                 car = new Physijs.BoxMesh( geometry, new THREE.MeshFaceMaterial(materials) );
+                carpos = new THREE.Object3D();
                 //Add the model to the scene
                 scene.add(car);
                 car.setDamping(0.8, 0.8);
@@ -56,6 +86,8 @@ function onLoad(){
     camera.rotation.x = -Math.PI/4;
     camera.position.y = 5;
     camera.position.z = 5;
+
+    camera_pivot.eulerOrder = 'YXZ';
             
     camera_pivot.add( camera );
 
@@ -99,16 +131,13 @@ var currentlyPressedKeys = {};
 function handleKeyDown(event) {
     currentlyPressedKeys[event.keyCode] = true;
     if (event.keyCode == 32) {
-        car.position.z = 1;
+        car.setLinearVelocity( new THREE.Vector3(0,10,0) );
     }
 }
 
 
 function handleKeyUp(event) {
     currentlyPressedKeys[event.keyCode] = false;
-    if (event.keyCode == 32) {
-        car.position.z = 0;
-    }
 }
 
 
@@ -144,6 +173,25 @@ function handleKeys(elapsed) {
     if (currentlyPressedKeys[89]) {
         //console.log(vector);
     }
+    if (currentlyPressedKeys[87]) {
+        car.setLinearVelocity( vector.multiplyScalar(10)  );
+    }
+    if (currentlyPressedKeys[65]) {
+        car.setLinearVelocity( vector.multiplyScalar(-10) );
+    }
+    if (currentlyPressedKeys[82]) {
+        car.setLinearVelocity( vector.multiplyScalar(-10) );
+    }
+    if (currentlyPressedKeys[83]) {
+        car.setLinearVelocity( new THREE.Vector3(
+            10*Math.cos(roty),
+            0,
+            10*Math.sin(roty)) );
+    }
+    /*if (!currentlyPressedKeys[87] && !currentlyPressedKeys[65]
+        && !currentlyPressedKeys[82] && !currentlyPressedKeys[83]) {
+        car.setLinearVelocity( 3 );
+    }*/
         //camera.position.z = car.position.z + 3 * Math.cos(car.rotation.y + extrarot);
         //camera.position.x = car.position.x + 3 * Math.sin(car.rotation.y + extrarot);
         //camera.position.y = car.position.y + 3;
