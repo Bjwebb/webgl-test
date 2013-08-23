@@ -21,9 +21,11 @@ function mouseMove(e) {
       e.mozMovementY      ||
       e.webkitMovementY   ||
       0;
-    console.log(movementX + ", " + movementY); 
-    camera_pivot.rotation.y += movementX/100;
+    car.__dirtyRotation = true;
+    car.rotateOnAxis( new THREE.Vector3(0,1,0), movementX/100 );
     camera_pivot.rotation.x -= movementY/100;
+    if (camera_pivot.rotation.x < -Math.PI/4) camera_pivot.rotation.x = -Math.PI/4;
+    if (camera_pivot.rotation.x > Math.PI/4) camera_pivot.rotation.x = Math.PI/4;
 }
 
 
@@ -66,14 +68,14 @@ document.getElementById('container').addEventListener("mousemove", mouseMove);
             var jsonLoader = new THREE.JSONLoader();
 
             //Load a model and store it in the variable XXX
-            jsonLoader.load( "blender/car.json", function( geometry, materials ) { 
-                car = new Physijs.BoxMesh( geometry, new THREE.MeshFaceMaterial(materials) );
+            jsonLoader.load( "blender/test.json", function( geometry, materials ) { 
+                car = new Physijs.ConvexMesh( geometry, new THREE.MeshFaceMaterial(materials) );
                 carpos = new THREE.Object3D();
                 //Add the model to the scene
                 scene.add(car);
                 car.setDamping(0.8, 0.8);
                 
-                var car2 = new Physijs.BoxMesh( geometry, new THREE.MeshFaceMaterial(materials) );
+                var car2 = new Physijs.ConvexMesh( geometry, new THREE.MeshFaceMaterial(materials) );
                 car2.position.x = -3;
                 scene.add(car2);
                 car2.setDamping(0.8, 0.8);
@@ -93,10 +95,21 @@ document.getElementById('container').addEventListener("mousemove", mouseMove);
 
             } );
 
+/*
+            jsonLoader.load( "blender/level.json", function( geometry, materials ) { 
+                var plane = new Physijs.ConvexMesh( geometry, new THREE.MeshFaceMaterial(materials), 0 );
+                carpos = new THREE.Object3D();
+                //Add the model to the scene
+                plane.position.y = -20;
+                scene.add(plane);
+
+            } );
+            */
+
       // plane FIXME
       var plane = new Physijs.BoxMesh(new THREE.CubeGeometry(40, 40, 0.5), new THREE.MeshNormalMaterial(), 0);
       plane.rotation.x = -Math.PI/2;
-      plane.position.y = -0.5
+      plane.position.y = -3;
       scene.add(plane);
 
             //Call the animate function
@@ -149,6 +162,9 @@ function handleKeys(elapsed) {
     var vector = new THREE.Vector3( 0, 0, -1 );
     vector.applyEuler( car.rotation, car.eulerOrder );
     vector.y = 0;
+    var cameraVector = new THREE.Vector3( 0, 0, -1 );
+    cameraVector.applyEuler( camera_pivot.rotation, camera_pivot.eulerOrder );
+    cameraVector.y = 0;
     if (currentlyPressedKeys[37]) {
         car.setAngularVelocity( new THREE.Vector3(0,1,0) );
     }
@@ -176,17 +192,15 @@ function handleKeys(elapsed) {
     if (currentlyPressedKeys[87]) {
         car.setLinearVelocity( vector.multiplyScalar(10)  );
     }
-    if (currentlyPressedKeys[65]) {
-        car.setLinearVelocity( vector.multiplyScalar(-10) );
-    }
     if (currentlyPressedKeys[82]) {
         car.setLinearVelocity( vector.multiplyScalar(-10) );
     }
+    vector.cross( new THREE.Vector3(0,1,0) );
+    if (currentlyPressedKeys[65]) {
+        car.setLinearVelocity( vector.multiplyScalar(-10) );
+    }
     if (currentlyPressedKeys[83]) {
-        car.setLinearVelocity( new THREE.Vector3(
-            10*Math.cos(roty),
-            0,
-            10*Math.sin(roty)) );
+        car.setLinearVelocity( vector.multiplyScalar(10) );
     }
     /*if (!currentlyPressedKeys[87] && !currentlyPressedKeys[65]
         && !currentlyPressedKeys[82] && !currentlyPressedKeys[83]) {
