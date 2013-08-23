@@ -148,13 +148,37 @@ function collisionDetection() {
     var center = car2.worldToLocal( car.localToWorld(car.geometry.boundingSphere.center.clone()) );
     var r = car.geometry.boundingSphere.radius;
     var bb = car2.geometry.boundingBox;
-    console.log((center.x-r));
-    console.log(bb.max.x);
-    console.log(center);
-    console.log(r);
-    if ((center.x + r) > bb.min.x && (center.x - r) < bb.max.x &&
-        (center.y + r) > bb.min.y && (center.y - r) < bb.max.y &&
-        (center.z + r) > bb.min.z && (center.z - r) < bb.max.z) {
+    deltas = [
+        center.x + r - bb.min.x,
+        bb.max.x - center.x + r,
+        center.y + r - bb.min.y,
+        bb.max.y - center.y + r,
+        center.z + r - bb.min.z,
+        bb.max.z - center.z + r
+    ];
+    console.log(deltas);
+    if ( deltas.filter(function(n){return n>0}).length == 6 ) {
+        i = deltas.indexOf(Math.min.apply(Math, deltas));
+        switch (i) {
+            case 0:
+                car.position.x -= deltas[i];
+                break;
+            case 1:
+                car.position.x += deltas[i];
+                break;
+            case 2:
+                car.position.y -= deltas[i];
+                break;
+            case 3:
+                car.position.y += deltas[i];
+                break;
+            case 4:
+                car.position.z -= deltas[i];
+                break;
+            case 5:
+                car.position.z += deltas[i];
+                break;
+        }
         return true;
     }
     return false;
@@ -185,14 +209,7 @@ function handleKeys(elapsed) {
             if (currentlyPressedKeys[83]) {
                 car.position.add( vector.multiplyScalar(elapsed*speed/1000)  );
             }
-            console.log(car.position);
-            if (collisionDetection()) {
-                car.position = old;
-                console.log('MOO');
-            }
-            console.log(old);
-            console.log(car.position);
-            console.log(' ');
+            collisionDetection();
         }
     }
 }
